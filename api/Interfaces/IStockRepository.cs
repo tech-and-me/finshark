@@ -9,7 +9,7 @@ namespace api.Interfaces
 {
     public interface IStockRepository
     {
-        Task<List<Stock>> GetAllAsync();
+        Task<List<Stock>> GetAllAsync(QueryObject query);
         Task<Stock?> getByIdAsync(int id); //FirstOrDefault CAN BE NULL
 
         Task<Stock> CreateAsync(Stock stockModel);

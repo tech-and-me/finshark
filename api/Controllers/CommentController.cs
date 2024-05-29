@@ -18,14 +18,19 @@ public class CommentController : ControllerBase
 
     [HttpGet]
     public async Task<IActionResult> GetAll(){
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
         var comments = await _commentRepo.GetAllAsync();
         var commentDto = comments.Select(x => x.ToCommentDto());
         
         return Ok(commentDto);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById([FromRoute] int id){
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
         var commentModel = await _commentRepo.GetByIdAsync(id);
 
         if(commentModel == null){
@@ -35,8 +40,11 @@ public class CommentController : ControllerBase
         return Ok(commentModel.ToCommentDto());
     }
 
-    [HttpPost("{stockId}")]
+    [HttpPost("{stockId:int}")]
     public async Task<IActionResult> Create ([FromRoute] int stockId, [FromBody] CreateCommentRequestDto commentDto){
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
         if(!await _stockRepo.StockExists(stockId)){
             return BadRequest("Stock does not exist");
         }
@@ -50,8 +58,11 @@ public class CommentController : ControllerBase
     }
 
     [HttpPut]
-    [Route("{commentId}")]
+    [Route("{commentId:int}")]
     public async Task<IActionResult> Update([FromRoute] int commentId, [FromBody] UpdateCommentRequestDto commentDto){
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
          var comment = await _commentRepo.UpdateAsync(commentId, commentDto.ToCommentFromUpdate());
 
          if(comment == null){
@@ -63,8 +74,11 @@ public class CommentController : ControllerBase
     }
 
     [HttpDelete]
-    [Route("{commentId}")]
+    [Route("{commentId:int}")]
     public async Task<IActionResult> Delete([FromRoute] int commentId){
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+            
         var comment = await _commentRepo.DeleteAsync(commentId);
         if (comment == null){
             return NotFound(" id not found");

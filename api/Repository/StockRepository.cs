@@ -41,9 +41,26 @@ namespace api.Repository
             return stockModel;
         }
 
-        public async Task<List<Stock>> GetAllAsync()
+        public async Task<List<Stock>> GetAllAsync(QueryObject query)
         {
-            return await _context.Stocks.Include( s => s.Comments).ToListAsync();
+            // return await _context.Stocks.Include( s => s.Comments).ToListAsync();
+            var stocks = _context.Stocks.Include( s => s.Comments).AsQueryable(); // preparing query only. The query is not fired yet. 
+
+            if(!string.IsNullOrWhiteSpace(query.CompanyName)){
+                stocks = stocks.Where( s => s.CompanyName.Contains(query.CompanyName));
+            }
+
+            if(!string.IsNullOrWhiteSpace(query.Symbol)){
+                stocks = stocks.Where( s => s.Symbol.Contains(query.Symbol));
+            }
+
+            if(!string.IsNullOrWhiteSpace(query.SortBy)){
+                if(query.SortBy.Equals("Symbol", StringComparison.OrdinalIgnoreCase)){
+                    stocks = query.IsDecending ? stocks.OrderByDescending( s => s.Symbol) : stocks.OrderBy(s => s.Symbol);
+                }
+            }
+
+            return await stocks.ToListAsync(); // ToListAsync() will fire the prepared query
         }
 
         public async Task<Stock?> getByIdAsync(int id)
